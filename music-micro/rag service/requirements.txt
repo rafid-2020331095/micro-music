@@ -1,0 +1,31 @@
+# fastapi==0.101.2
+# uvicorn[standard]==0.22.0
+# python-multipart==0.0.6
+# openai==1.28.0
+# langchain==0.0.319
+# qdrant-client==1.8.2
+# python-dotenv==1.0.0
+# aiofiles==23.1.0
+# httpx==0.24.1
+# pydantic==2.4.0
+
+fastapi
+uvicorn[standard]
+python-multipart
+openai
+langchain
+qdrant-client[grpc]
+python-dotenv
+aiofiles
+httpx
+pydantic
+langchain  
+langchain-qdrant   
+langchain-openai 
+langchain-text-splitters 
+qdrant-client
+langchain-core
+langchain 
+langchain-text-splitters 
+langchain-community 
+bs4

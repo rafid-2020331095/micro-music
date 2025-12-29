@@ -2,6 +2,7 @@ import { Request } from "express";
 import TryCatch from "./TryCatch.js";
 import getBuffer from "./config/dataUri.js";
 import cloudinary from "cloudinary";
+import axios from "axios";
 import { sql } from "./config/db.js";
 import { redisClient } from "./index.js";
 
@@ -103,13 +104,28 @@ export const addSong = TryCatch(async (req: AuthencatedRequest, res) => {
 
   const result = await sql`
     INSERT INTO songs (title, description, audio, album_id) VALUES
-    (${title}, ${description}, ${cloud.secure_url}, ${album})
+    (${title}, ${description}, ${cloud.secure_url}, ${album}) RETURNING *
   `;
 
   if (redisClient.isReady) {
     await redisClient.del("songs");
     console.log("Cache invalidated for songs");
   }
+
+  // Notify the Python RAG service to process this song (fire-and-forget)
+  (async () => {
+    try {
+      const ragUrl = process.env.RAG_SERVICE_URL || "http://localhost:8001";
+      const payload = {
+        song_id: result[0].id,
+        title,
+        audio_url: cloud.secure_url,
+      };
+      await axios.post(`${ragUrl}/admin/process-song`, payload, { timeout: 20000 });
+    } catch (err) {
+      console.error("Failed to notify RAG service:", err);
+    }
+  })();
 
   res.json({
     message: "Song Added",
